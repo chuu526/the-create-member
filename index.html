@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The創會員中心</title>
-  <!-- 1. 引入 LINE LIFF SDK -->
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     body {
@@ -52,6 +51,39 @@
       color: #222;
       font-size: 16px;
     }
+    .admin-panel {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 2px dashed #eee;
+      text-align: left;
+    }
+    .admin-title {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    button {
+      background-color: #06c755;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 5px;
+    }
+    button:active {
+      opacity: 0.8;
+    }
+    input[type="number"] {
+      padding: 7px;
+      width: 80px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-right: 5px;
+    }
     #loading {
       padding: 40px 0;
       color: #666;
@@ -86,18 +118,26 @@
         <span class="label">本月來店禮狀態</span>
         <span id="monthlyGiftClaimed" class="value">-</span>
       </div>
+
+      <!-- 店員專用快捷加值面板 -->
+      <div class="admin-panel">
+        <div class="admin-title">⚡ 櫃檯快速加值（店員操作）</div>
+        <div style="display: flex; align-items: center;">
+          <input type="number" id="addAmount" placeholder="金額" value="500">
+          <button onclick="addBalance(500)">+500</button>
+          <button onclick="addBalance(1000)">+1000</button>
+          <button onclick="customAdd()">自訂加值</button>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    // ==========================================
-    // 請在這裡填入妳的設定
-    // ==========================================
     const API_URL = "https://script.google.com/macros/s/AKfycbw3McIIaMCQl2RHeKTuV5zAMhzFk7LTM7oSSiM2S1jAYu4tFwsL28tWPLMu-iK7WHbo/exec"; 
     const MY_LIFF_ID = "2011836192-UdXeALfd"; 
-    // ==========================================
 
-    // 網頁載入後先初始化 LIFF
+    let currentUid = ""; // 記錄當前會員的 UID
+
     window.onload = function() {
       initializeLiff();
     };
@@ -106,27 +146,23 @@
       liff.init({ liffId: MY_LIFF_ID })
         .then(() => {
           if (!liff.isLoggedIn()) {
-            liff.login(); // 若未登入 LINE 則引導登入
+            liff.login();
           } else {
-            // 取得 LINE 使用者真實資料
             liff.getProfile().then(profile => {
+              currentUid = profile.userId;
               loadMemberData(profile.userId, profile.displayName);
             }).catch(err => {
-              console.error('取得 Line Profile 失敗', err);
-              // 如果失敗，使用備用測試帳號
               loadMemberData("U_test_error", "測試訪客");
             });
           }
         })
         .catch((err) => {
-          console.error('LIFF 初始化失敗（可能在一般電腦瀏覽器開啟）', err);
-          // 在電腦一般瀏覽器測試時的備用資料
           loadMemberData("U_desktop_test", "The創老闆");
         });
     }
 
-    // 向 Google Apps Script 發送請求抓取會員資料
     async function loadMemberData(uid, name) {
+      currentUid = uid;
       try {
         const response = await fetch(`${API_URL}?action=getInfo&uid=${uid}&name=${encodeURIComponent(name)}`);
         const result = await response.json();
@@ -145,6 +181,44 @@
       } catch (error) {
         document.getElementById('loading').innerText = "發生錯誤：" + error.message;
       }
+    }
+
+    // 快速加值按鈕功能
+    async function addBalance(amount) {
+      if (!currentUid) {
+        alert("尚未取得會員 UID！");
+        return;
+      }
+
+      if (!confirm(`確定要幫此會員加值 ${amount} 元嗎？`)) {
+        return;
+      }
+
+      try {
+        const url = `${API_URL}?action=updateBalance&uid=${currentUid}&amount=${amount}&remark=櫃檯快速加值`;
+        const response = await fetch(url);
+        const result = await response.json();
+
+        if (result.success) {
+          alert(`加值成功！目前餘額：${result.newBalance} 元`);
+          // 重新整理畫面的餘額顯示
+          document.getElementById('diyBalance').innerText = result.newBalance + " 元";
+        } else {
+          alert("加值失敗：" + result.message);
+        }
+      } catch (error) {
+        alert("發生錯誤：" + error.message);
+      }
+    }
+
+    function customAdd() {
+      const val = document.getElementById('addAmount').value;
+      const num = parseInt(val);
+      if (isNaN(num) || num <= 0) {
+        alert("請輸入有效的金額！");
+        return;
+      }
+      addBalance(num);
     }
   </script>
 
