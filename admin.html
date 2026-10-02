@@ -193,7 +193,7 @@
 
     <div class="form-group">
       <label id="amountLabel">加值金額 (元)：</label>
-      <input type="number" id="amountInput" value="500">
+      <input type="number" id="amountInput" value="500" placeholder="請輸入金額">
     </div>
 
     <div class="form-group">
@@ -207,7 +207,6 @@
   </div>
 
   <script>
-    // 請確認這裡填入妳目前最新的 Apps Script 部署網址
     const API_URL = "https://script.google.com/macros/s/AKfycbw34bhpUh__cAb2liixfNKW15-mBUM45M74WxvzYMWesFZHEYtn__Rh1ux3q3JBbKUv/exec";
 
     let html5QrCode;
@@ -236,11 +235,11 @@
         topupBtn.className = "mode-btn";
         deductBtn.className = "mode-btn active-deduct";
         amountLabel.innerText = "扣款金額 (元)：";
-        remarkInput.value = "生日禮兌換";
+        remarkInput.value = "DIY消費扣款"; // 預設備註
         submitBtn.innerText = "確認送出扣款";
         submitBtn.style.backgroundColor = "#8d6e63";
         quickContainer.style.display = "none";
-        document.getElementById('amountInput').value = "0";
+        document.getElementById('amountInput').value = ""; // 金額預設空白
       }
     }
 
@@ -283,21 +282,26 @@
 
     async function submitBalance() {
       const uid = document.getElementById('uidInput').value.trim();
-      let amount = parseInt(document.getElementById('amountInput').value);
+      const rawAmount = document.getElementById('amountInput').value;
       const remark = document.getElementById('remarkInput').value.trim();
 
       if (!uid) {
         alert("請先掃描客人的 QR Code 或輸入 UID！");
         return;
       }
-      
-      // 修改這裡：改為允許 0 元（大於或等於 0 即可）
-      if (isNaN(amount) || amount < 0) {
+
+      if (rawAmount === "" || isNaN(rawAmount)) {
         alert("請輸入有效的金額！");
         return;
       }
 
-      // 如果是扣款模式，將金額轉為負數傳給後端（如果是 0 則保持 0）
+      let amount = parseFloat(rawAmount);
+      if (amount < 0) {
+        alert("金額不可小於 0！");
+        return;
+      }
+
+      // 如果是扣款模式，將金額轉為負數傳給後端（若輸入 0 則維持 0）
       if (currentMode === 'deduct') {
         amount = -Math.abs(amount);
       }
@@ -314,11 +318,22 @@
       try {
         const url = `${API_URL}?action=updateBalance&uid=${encodeURIComponent(uid)}&amount=${amount}&remark=${encodeURIComponent(remark)}`;
         const response = await fetch(url);
-        const result = await response.json();
+        const textResponse = await response.text();
+        
+        let result;
+        try {
+          result = JSON.parse(textResponse);
+        } catch (e) {
+          throw new Error("後台回傳格式錯誤（請確認 Google Apps Script 部署權限是否設為『任何人』）");
+        }
 
         if (result.success) {
           resultBox.innerHTML = `✅ <b>${actionText}成功！</b><br>會員姓名：${result.name}<br>更新後餘額：<b>${result.newBalance} 元</b>`;
           document.getElementById('uidInput').value = "";
+          if (currentMode === 'deduct') {
+            document.getElementById('amountInput').value = "";
+            document.getElementById('remarkInput').value = "DIY消費扣款";
+          }
         } else {
           resultBox.innerHTML = `❌ 失敗：${result.message}`;
         }
