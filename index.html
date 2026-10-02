@@ -149,15 +149,20 @@
         <span id="diyBalance" class="value" style="color: #d9534f;">-</span>
       </div>
       
-      <!-- 生日設定區塊 -->
+      <!-- 生日設定/顯示區塊 -->
       <div class="info-group" style="flex-direction: column; align-items: stretch; gap: 8px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span class="label">生日與壽星福利</span>
+          <span class="label">壽星專屬福利</span>
           <span id="birthdayBenefit" style="font-size: 12px; color: #e67e22; font-weight: bold;">-</span>
         </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
+        <!-- 未設定時顯示輸入框與按鈕 -->
+        <div id="birthdaySetArea" style="display: flex; gap: 8px; align-items: center;">
           <input type="date" id="birthdayInput" style="flex: 1; padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;">
           <button class="btn-save" onclick="saveBirthday()">儲存生日</button>
+        </div>
+        <!-- 已設定時顯示鎖定文字 -->
+        <div id="birthdayDisplayArea" style="display: none; font-size: 14px; color: #333; font-weight: bold; text-align: center; padding: 4px 0;">
+          🎂 生日已設定：<span id="birthdayText"></span>
         </div>
       </div>
 
@@ -241,8 +246,15 @@
           document.getElementById('level').innerText = result.level;
           document.getElementById('diyBalance').innerText = result.diyBalance + " 元";
           document.getElementById('birthdayBenefit').innerText = result.birthdayBenefit;
+
+          // 判斷是否已經填過生日
           if (result.birthday) {
-            document.getElementById('birthdayInput').value = result.birthday;
+            document.getElementById('birthdaySetArea').style.display = 'none'; // 隱藏輸入框跟按鈕
+            document.getElementById('birthdayDisplayArea').style.display = 'block'; // 顯示已設定文字
+            document.getElementById('birthdayText').innerText = result.birthday;
+          } else {
+            document.getElementById('birthdaySetArea').style.display = 'flex'; // 顯示輸入框
+            document.getElementById('birthdayDisplayArea').style.display = 'none'; // 隱藏已設定文字
           }
 
           const historyContainer = document.getElementById('historyList');
