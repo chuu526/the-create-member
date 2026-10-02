@@ -9,7 +9,7 @@
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #f0f2f5;
+      background-color: #f7f5f2; /* 溫馨淺色背景 */
       margin: 0;
       padding: 20px;
       display: flex;
@@ -20,12 +20,13 @@
       width: 100%;
       max-width: 500px;
       border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 16px rgba(141, 110, 99, 0.12);
       padding: 24px;
       box-sizing: border-box;
+      border: 1px solid #efebe9;
     }
     h2 {
-      color: #333;
+      color: #5d4037; /* 深咖啡色標題 */
       text-align: center;
       margin-bottom: 20px;
       font-size: 20px;
@@ -36,7 +37,7 @@
     label {
       display: block;
       margin-bottom: 6px;
-      color: #555;
+      color: #6d4c41;
       font-size: 14px;
       font-weight: bold;
     }
@@ -44,12 +45,20 @@
       width: 100%;
       padding: 10px 12px;
       box-sizing: border-box;
-      border: 1px solid #ddd;
+      border: 1px solid #d7ccc8;
       border-radius: 8px;
       font-size: 15px;
+      background-color: #faf8f6;
+      color: #3e2723;
     }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #8d6e63;
+      background-color: #fff;
+    }
+    /* 淺咖啡色掃描按鈕 */
     .scan-btn {
-      background-color: #00b900;
+      background-color: #a1887f;
       color: white;
       border: none;
       width: 100%;
@@ -59,6 +68,10 @@
       font-weight: bold;
       cursor: pointer;
       margin-bottom: 10px;
+      transition: background 0.2s;
+    }
+    .scan-btn:hover {
+      background-color: #8d6e63;
     }
     #reader {
       width: 100%;
@@ -66,9 +79,63 @@
       margin-bottom: 15px;
       border-radius: 8px;
       overflow: hidden;
+      border: 2px solid #d7ccc8;
     }
+    
+    /* 加值/扣款切換按鈕群組 */
+    .mode-switch {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .mode-btn {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #d7ccc8;
+      border-radius: 8px;
+      background-color: #faf8f6;
+      color: #6d4c41;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mode-btn.active-topup {
+      background-color: #8d6e63;
+      color: white;
+      border-color: #8d6e63;
+    }
+    .mode-btn.active-deduct {
+      background-color: #d7ccc8;
+      color: #3e2723;
+      border-color: #bcaaa4;
+    }
+
+    /* 快速金額按鈕 */
+    .quick-amounts {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+    }
+    .quick-btn {
+      flex: 1;
+      padding: 6px;
+      background-color: #efebe9;
+      border: 1px solid #d7ccc8;
+      border-radius: 6px;
+      color: #5d4037;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .quick-btn:hover {
+      background-color: #d7ccc8;
+    }
+
+    /* 確認送出按鈕（淺咖啡色） */
     button.submit-btn {
-      background-color: #06c755;
+      background-color: #6d4c41;
       color: white;
       border: none;
       width: 100%;
@@ -78,25 +145,30 @@
       font-weight: bold;
       cursor: pointer;
       margin-top: 10px;
+      transition: background 0.2s;
+    }
+    button.submit-btn:hover {
+      background-color: #5d4037;
     }
     button:active {
-      opacity: 0.8;
+      opacity: 0.85;
     }
     #resultBox {
       margin-top: 20px;
       padding: 12px;
-      background: #f9f9f9;
+      background: #faf8f6;
+      border: 1px solid #d7ccc8;
       border-radius: 8px;
       display: none;
       font-size: 14px;
-      color: #333;
+      color: #3e2723;
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h2>🌿 The創 - 櫃檯加值管理</h2>
+    <h2>☕ The創 - 櫃檯會員管理</h2>
     
     <div class="form-group">
       <label>客人的 LINE UID：</label>
@@ -107,16 +179,20 @@
 
     <div class="form-group">
       <label>操作類型：</label>
-      <select id="actionType">
-        <option value="500">加值 +500 元</option>
-        <option value="1000">加值 +1000 元</option>
-        <option value="2000">加值 +2000 元</option>
-        <option value="-1">【扣款】消費扣款（請自訂金額）</option>
-      </select>
+      <div class="mode-switch">
+        <button type="button" id="topupModeBtn" class="mode-btn active-topup" onclick="setMode('topup')">➕ 會員加值</button>
+        <button type="button" id="deductModeBtn" class="mode-btn" onclick="setMode('deduct')">➖ 消費扣款</button>
+      </div>
+      <!-- 快捷金額按鈕 -->
+      <div class="quick-amounts" id="quickAmountsContainer">
+        <button type="button" class="quick-btn" onclick="setAmount(500)">+500</button>
+        <button type="button" class="quick-btn" onclick="setAmount(1000)">+1000</button>
+        <button type="button" class="quick-btn" onclick="setAmount(2000)">+2000</button>
+      </div>
     </div>
 
     <div class="form-group">
-      <label>金額 (元)：</label>
+      <label id="amountLabel">加值金額 (元)：</label>
       <input type="number" id="amountInput" value="500">
     </div>
 
@@ -125,7 +201,7 @@
       <input type="text" id="remarkInput" value="櫃檯現金儲值">
     </div>
 
-    <button class="submit-btn" onclick="submitBalance()">確認送出加值/扣款</button>
+    <button class="submit-btn" id="submitBtn" onclick="submitBalance()">確認送出加值</button>
 
     <div id="resultBox"></div>
   </div>
@@ -135,6 +211,42 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbw34bhpUh__cAb2liixfNKW15-mBUM45M74WxvzYMWesFZHEYtn__Rh1ux3q3JBbKUv/exec";
 
     let html5QrCode;
+    let currentMode = 'topup'; // 'topup' 或 'deduct'
+
+    // 切換加值或扣款模式
+    function setMode(mode) {
+      currentMode = mode;
+      const topupBtn = document.getElementById('topupModeBtn');
+      const deductBtn = document.getElementById('deductModeBtn');
+      const amountLabel = document.getElementById('amountLabel');
+      const remarkInput = document.getElementById('remarkInput');
+      const submitBtn = document.getElementById('submitBtn');
+      const quickContainer = document.getElementById('quickAmountsContainer');
+
+      if (mode === 'topup') {
+        topupBtn.className = "mode-btn active-topup";
+        deductBtn.className = "mode-btn";
+        amountLabel.innerText = "加值金額 (元)：";
+        remarkInput.value = "櫃檯現金儲值";
+        submitBtn.innerText = "確認送出加值";
+        submitBtn.style.backgroundColor = "#6d4c41";
+        quickContainer.style.display = "flex";
+        document.getElementById('amountInput').value = "500";
+      } else {
+        topupBtn.className = "mode-btn";
+        deductBtn.className = "mode-btn active-deduct";
+        amountLabel.innerText = "扣款金額 (元)：";
+        remarkInput.value = "DIY 消費扣款";
+        submitBtn.innerText = "確認送出扣款";
+        submitBtn.style.backgroundColor = "#8d6e63";
+        quickContainer.style.display = "none";
+        document.getElementById('amountInput').value = "";
+      }
+    }
+
+    function setAmount(val) {
+      document.getElementById('amountInput').value = val;
+    }
 
     // 啟動相機掃描
     function startScanner() {
@@ -146,59 +258,33 @@
       }
 
       html5QrCode.start(
-        { facingMode: "environment" }, // 使用後置鏡頭
+        { facingMode: "environment" },
         {
           fps: 10,
           qrbox: { width: 250, height: 250 }
         },
         (decodedText, decodedResult) => {
-          // 成功掃描到 QR Code
           handleScannedData(decodedText);
-          // 停止相機並隱藏框框
           html5QrCode.stop().then(() => {
             readerDiv.style.display = 'none';
           }).catch(err => console.error(err));
         },
-        (errorMessage) => {
-          // 掃描中（未對準時不用理會錯誤）
-        }
+        (errorMessage) => {}
       ).catch(err => {
         alert("無法開啟相機，請檢查相機權限是否允許！");
         readerDiv.style.display = 'none';
       });
     }
 
-    // 解析掃描到的內容
     function handleScannedData(text) {
-      // LINE 個人 QR Code 格式通常是 https://line.me/ti/p/xxxx 或其他結構
-      // 也有可能是直接存 UID 或好友連結
-      // 這裡我們直接把掃到的文字填進 UID 欄位（如果客人是掃加好友或個人網址，後續我們可以對應，
-      // 但最準確的是直接抓取該網址或讓客人出示會員中心裡的 UID）
-      // 💡 註：LINE 個人 QR Code 內含的是對應的網址。
-      // 為了最保險，我們也可以直接把掃到的整串網址或文字帶進去，
-      // 如果後端希望直接收 UID，我們可以在這裡做簡單處理，或是請客人直接掃我們專屬的綁定頁面。
-      
       document.getElementById('uidInput').value = text;
       alert("成功讀取 QR Code！");
     }
-
-    // 當下拉選單改變時自動填入金額
-    document.getElementById('actionType').addEventListener('change', function() {
-      const val = this.value;
-      if (val !== "-1") {
-        document.getElementById('amountInput').value = val;
-        document.getElementById('remarkInput').value = "櫃檯現金儲值";
-      } else {
-        document.getElementById('amountInput').value = "";
-        document.getElementById('remarkInput').value = "DIY 消費扣款";
-      }
-    });
 
     async function submitBalance() {
       const uid = document.getElementById('uidInput').value.trim();
       let amount = parseInt(document.getElementById('amountInput').value);
       const remark = document.getElementById('remarkInput').value.trim();
-      const actionType = document.getElementById('actionType').value;
 
       if (!uid) {
         alert("請先掃描客人的 QR Code 或輸入 UID！");
@@ -209,11 +295,13 @@
         return;
       }
 
-      if (actionType === "-1") {
+      // 如果是扣款模式，將金額轉為負數傳給後端
+      if (currentMode === 'deduct') {
         amount = -Math.abs(amount);
       }
 
-      if (!confirm(`確定要執行此筆金額變動嗎？`)) {
+      const actionText = currentMode === 'topup' ? '加值' : '扣款';
+      if (!confirm(`確定要對此會員執行 ${Math.abs(amount)} 元的${actionText}嗎？`)) {
         return;
       }
 
@@ -227,7 +315,7 @@
         const result = await response.json();
 
         if (result.success) {
-          resultBox.innerHTML = `✅ <b>操作成功！</b><br>會員姓名：${result.name}<br>更新後餘額：<b>${result.newBalance} 元</b>`;
+          resultBox.innerHTML = `✅ <b>${actionText}成功！</b><br>會員姓名：${result.name}<br>更新後餘額：<b>${result.newBalance} 元</b>`;
           document.getElementById('uidInput').value = "";
         } else {
           resultBox.innerHTML = `❌ 失敗：${result.message}`;
