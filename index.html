@@ -157,7 +157,7 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbw34bhpUh__cAb2liixfNKW15-mBUM45M74WxvzYMWesFZHEYtn__Rh1ux3q3JBbKUv/exec"; 
+    const API_URL = "https://script.google.com/macros/s/AKfycbw3McIIaMCQl2RHeKTuV5zAMhzFk7LTM7oSSiM2S1jAYu4tFwsL28tWPLMu-iK7WHbo/exec"; 
     const MY_LIFF_ID = "2011836192-UdXeALfd"; 
 
     window.onload = function() {
@@ -233,12 +233,9 @@
         const result = await response.json();
 
         const historyContainer = document.getElementById('historyList');
-        
-        // 🛑 顯示後端回傳的原始 JSON 資料供檢查
-        let debugHtml = `<div style="font-size: 11px; color: blue; padding: 4px; word-break: break-all; background: #eef; margin-bottom: 5px;">後端回傳：${JSON.stringify(result)}</div>`;
 
         if (result.success && result.history && result.history.length > 0) {
-          let html = debugHtml;
+          let html = "";
           result.history.forEach(item => {
             const amountColor = item.amount > 0 ? "#06c755" : "#d9534f";
             const amountText = item.amount > 0 ? `+${item.amount}` : item.amount;
@@ -254,10 +251,10 @@
           });
           historyContainer.innerHTML = html;
         } else {
-          historyContainer.innerHTML = debugHtml + `<div style="color: #888; text-align: center; padding: 10px;">尚無交易紀錄 (UID: ${uid})</div>`;
+          historyContainer.innerHTML = `<div style="color: #888; text-align: center; padding: 10px;">尚無交易紀錄</div>`;
         }
       } catch (error) {
-        document.getElementById('historyList').innerHTML = `<div style="color: #d9534f; text-align: center; padding: 10px;">無法載入紀錄: ${error.message}</div>`;
+        document.getElementById('historyList').innerHTML = `<div style="color: #d9534f; text-align: center; padding: 10px;">無法載入紀錄</div>`;
       }
     }
   </script>
