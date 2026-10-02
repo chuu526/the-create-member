@@ -141,12 +141,12 @@
         <span id="name" class="value">-</span>
       </div>
       <div class="info-group">
-        <span class="label">會員等級</span>
-        <span id="level" class="value">-</span>
-      </div>
-      <div class="info-group">
         <span class="label">DIY 儲值金餘額</span>
         <span id="diyBalance" class="value" style="color: #d9534f;">-</span>
+      </div>
+      <div class="info-group">
+        <span class="label">會員等級</span>
+        <span id="level" class="value">-</span>
       </div>
       
       <!-- 生日設定/顯示區塊 -->
@@ -247,14 +247,13 @@
           document.getElementById('diyBalance').innerText = result.diyBalance + " 元";
           document.getElementById('birthdayBenefit').innerText = result.birthdayBenefit;
 
-          // 判斷是否已經填過生日
           if (result.birthday) {
-            document.getElementById('birthdaySetArea').style.display = 'none'; // 隱藏輸入框跟按鈕
-            document.getElementById('birthdayDisplayArea').style.display = 'block'; // 顯示已設定文字
+            document.getElementById('birthdaySetArea').style.display = 'none';
+            document.getElementById('birthdayDisplayArea').style.display = 'block';
             document.getElementById('birthdayText').innerText = result.birthday;
           } else {
-            document.getElementById('birthdaySetArea').style.display = 'flex'; // 顯示輸入框
-            document.getElementById('birthdayDisplayArea').style.display = 'none'; // 隱藏已設定文字
+            document.getElementById('birthdaySetArea').style.display = 'flex';
+            document.getElementById('birthdayDisplayArea').style.display = 'none';
           }
 
           const historyContainer = document.getElementById('historyList');
