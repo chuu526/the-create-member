@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The創會員中心</title>
+  <!-- 1. 引入 LINE LIFF SDK -->
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -88,12 +90,45 @@
   </div>
 
   <script>
-    // 把妳剛剛部署好的 Apps Script 網址貼在這邊
-    const API_URL = "https://script.google.com/macros/s/AKfycbw3McIIaMCQl2RHeKTuV5zAMhzFk7LTM7oSSiM2S1jAYu4tFwsL28tWPLMu-iK7WHbo/exec"; 
+    // ==========================================
+    // 請在這裡填入妳的設定
+    // ==========================================
+    const API_URL = "妳的_Apps_Script_部署網址"; 
+    const MY_LIFF_ID = "妳的_LIFF_ID"; 
+    // ==========================================
 
-    async function loadMemberData() {
+    // 網頁載入後先初始化 LIFF
+    window.onload = function() {
+      initializeLiff();
+    };
+
+    function initializeLiff() {
+      liff.init({ liffId: MY_LIFF_ID })
+        .then(() => {
+          if (!liff.isLoggedIn()) {
+            liff.login(); // 若未登入 LINE 則引導登入
+          } else {
+            // 取得 LINE 使用者真實資料
+            liff.getProfile().then(profile => {
+              loadMemberData(profile.userId, profile.displayName);
+            }).catch(err => {
+              console.error('取得 Line Profile 失敗', err);
+              // 如果失敗，使用備用測試帳號
+              loadMemberData("U_test_error", "測試訪客");
+            });
+          }
+        })
+        .catch((err) => {
+          console.error('LIFF 初始化失敗（可能在一般電腦瀏覽器開啟）', err);
+          // 在電腦一般瀏覽器測試時的備用資料
+          loadMemberData("U_desktop_test", "The創老闆");
+        });
+    }
+
+    // 向 Google Apps Script 發送請求抓取會員資料
+    async function loadMemberData(uid, name) {
       try {
-        const response = await fetch(`${API_URL}?action=getInfo&uid=U_test_user&name=${encodeURIComponent('The創老闆')}`);
+        const response = await fetch(`${API_URL}?action=getInfo&uid=${uid}&name=${encodeURIComponent(name)}`);
         const result = await response.json();
 
         document.getElementById('loading').style.display = 'none';
@@ -111,8 +146,6 @@
         document.getElementById('loading').innerText = "發生錯誤：" + error.message;
       }
     }
-
-    loadMemberData();
   </script>
 
 </body>
