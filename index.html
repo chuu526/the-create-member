@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The創會員中心</title>
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <!-- 引入產生 QR Code 的套件 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     body {
@@ -137,8 +136,8 @@
         <span id="diyBalance" class="value" style="color: #d9534f;">-</span>
       </div>
       <div class="info-group">
-        <span class="label">本月來店禮狀態</span>
-        <span id="monthlyGiftClaimed" class="value">-</span>
+        <span class="label">壽星專屬福利</span>
+        <span id="birthdayBenefit" class="value" style="color: #e67e22; font-size: 14px;">-</span>
       </div>
 
       <!-- 客人專屬會員條碼 -->
@@ -174,7 +173,6 @@
             liff.getProfile().then(profile => {
               loadMemberData(profile.userId, profile.displayName);
               loadMemberHistory(profile.userId);
-              // 動產生客人的專屬 QR Code (內容為其 LINE UID)
               generateQRCode(profile.userId);
             }).catch(err => {
               loadMemberData("U_test_error", "測試訪客");
@@ -211,7 +209,7 @@
           document.getElementById('name').innerText = result.name;
           document.getElementById('level').innerText = result.level;
           document.getElementById('diyBalance').innerText = result.diyBalance + " 元";
-          document.getElementById('monthlyGiftClaimed').innerText = result.monthlyGiftClaimed;
+          document.getElementById('birthdayBenefit').innerText = result.birthdayBenefit;
         } else {
           alert("載入失敗：" + result.message);
         }
