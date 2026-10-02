@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The創會員中心</title>
   <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <!-- 引入產生 QR Code 的套件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -51,8 +53,27 @@
       color: #222;
       font-size: 16px;
     }
+    .qrcode-section {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .qrcode-title {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    #qrcode {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+    }
     .history-section {
-      margin-top: 25px;
+      margin-top: 20px;
       text-align: left;
       border-top: 1px solid #eee;
       padding-top: 15px;
@@ -64,7 +85,7 @@
       margin-bottom: 10px;
     }
     .history-list {
-      max-height: 180px;
+      max-height: 140px;
       overflow-y: auto;
       font-size: 13px;
     }
@@ -80,7 +101,7 @@
     }
     .history-info {
       color: #666;
-      font-size: 12px;
+      font-size: 11px;
     }
     .history-amount {
       font-weight: bold;
@@ -120,7 +141,13 @@
         <span id="monthlyGiftClaimed" class="value">-</span>
       </div>
 
-      <!-- 儲值金使用紀錄區塊 -->
+      <!-- 客人專屬會員條碼 -->
+      <div class="qrcode-section">
+        <div class="qrcode-title">🪪 我的會員條碼（結帳/儲值請出示）</div>
+        <div id="qrcode"></div>
+      </div>
+
+      <!-- 交易紀錄 -->
       <div class="history-section">
         <div class="history-title">📜 最近交易紀錄</div>
         <div class="history-list" id="historyList">
@@ -147,16 +174,29 @@
             liff.getProfile().then(profile => {
               loadMemberData(profile.userId, profile.displayName);
               loadMemberHistory(profile.userId);
+              // 動產生客人的專屬 QR Code (內容為其 LINE UID)
+              generateQRCode(profile.userId);
             }).catch(err => {
               loadMemberData("U_test_error", "測試訪客");
               loadMemberHistory("U_test_error");
+              generateQRCode("U_test_error");
             });
           }
         })
         .catch((err) => {
           loadMemberData("U_desktop_test", "The創老闆");
           loadMemberHistory("U_desktop_test");
+          generateQRCode("U_desktop_test");
         });
+    }
+
+    function generateQRCode(uid) {
+      document.getElementById("qrcode").innerHTML = "";
+      new QRCode(document.getElementById("qrcode"), {
+        text: uid,
+        width: 140,
+        height: 140
+      });
     }
 
     async function loadMemberData(uid, name) {
