@@ -161,7 +161,19 @@
     const MY_LIFF_ID = "2011836192-UdXeALfd"; 
 
     window.onload = function() {
-      initializeLiff();
+      // 檢查網址列有沒有帶 ?uid=xxx 參數（方便電腦直接測試）
+      const urlParams = new URLSearchParams(window.location.search);
+      const testUid = urlParams.get('uid');
+
+      if (testUid) {
+        // 如果有帶，就直接用這個 UID 撈資料，不用走 LIFF
+        loadMemberData(testUid, "測試會員");
+        loadMemberHistory(testUid);
+        generateQRCode(testUid);
+      } else {
+        // 正常手機 LIFF 流程
+        initializeLiff();
+      }
     };
 
     function initializeLiff() {
