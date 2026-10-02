@@ -105,6 +105,19 @@
     .history-amount {
       font-weight: bold;
     }
+    .btn-save {
+      background-color: #06c755;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn-save:active {
+      opacity: 0.8;
+    }
     #loading {
       padding: 40px 0;
       color: #666;
@@ -135,9 +148,17 @@
         <span class="label">DIY 儲值金餘額</span>
         <span id="diyBalance" class="value" style="color: #d9534f;">-</span>
       </div>
-      <div class="info-group">
-        <span class="label">壽星專屬福利</span>
-        <span id="birthdayBenefit" class="value" style="color: #e67e22; font-size: 14px;">-</span>
+      
+      <!-- 生日設定區塊 -->
+      <div class="info-group" style="flex-direction: column; align-items: stretch; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="label">生日與壽星福利</span>
+          <span id="birthdayBenefit" style="font-size: 12px; color: #e67e22; font-weight: bold;">-</span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input type="date" id="birthdayInput" style="flex: 1; padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;">
+          <button class="btn-save" onclick="saveBirthday()">儲存生日</button>
+        </div>
       </div>
 
       <!-- 客人專屬會員條碼 -->
@@ -159,14 +180,15 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbw34bhpUh__cAb2liixfNKW15-mBUM45M74WxvzYMWesFZHEYtn__Rh1ux3q3JBbKUv/exec"; 
     const MY_LIFF_ID = "2011836192-UdXeALfd"; 
+    let currentUid = "";
 
     window.onload = function() {
       const urlParams = new URLSearchParams(window.location.search);
       const testUid = urlParams.get('uid');
 
       if (testUid) {
-        loadMemberData(testUid, "測試會員");
-        loadMemberHistory(testUid);
+        currentUid = testUid;
+        loadMemberAllData(testUid, "測試會員");
         generateQRCode(testUid);
       } else {
         initializeLiff();
@@ -180,20 +202,20 @@
             liff.login();
           } else {
             liff.getProfile().then(profile => {
-              loadMemberData(profile.userId, profile.displayName);
-              loadMemberHistory(profile.userId);
+              currentUid = profile.userId;
+              loadMemberAllData(profile.userId, profile.displayName);
               generateQRCode(profile.userId);
             }).catch(err => {
-              loadMemberData("U_test_error", "測試訪客");
-              loadMemberHistory("U_test_error");
-              generateQRCode("U_test_error");
+              currentUid = "U_test_error";
+              loadMemberAllData(currentUid, "測試訪客");
+              generateQRCode(currentUid);
             });
           }
         })
         .catch((err) => {
-          loadMemberData("U_desktop_test", "The創老闆");
-          loadMemberHistory("U_desktop_test");
-          generateQRCode("U_desktop_test");
+          currentUid = "U_desktop_test";
+          loadMemberAllData(currentUid, "The創老闆");
+          generateQRCode(currentUid);
         });
     }
 
@@ -206,9 +228,9 @@
       });
     }
 
-    async function loadMemberData(uid, name) {
+    async function loadMemberAllData(uid, name) {
       try {
-        const response = await fetch(`${API_URL}?action=getInfo&uid=${uid}&name=${encodeURIComponent(name)}`);
+        const response = await fetch(`${API_URL}?action=getMemberAll&uid=${uid}&name=${encodeURIComponent(name)}`);
         const result = await response.json();
 
         document.getElementById('loading').style.display = 'none';
@@ -219,6 +241,31 @@
           document.getElementById('level').innerText = result.level;
           document.getElementById('diyBalance').innerText = result.diyBalance + " 元";
           document.getElementById('birthdayBenefit').innerText = result.birthdayBenefit;
+          if (result.birthday) {
+            document.getElementById('birthdayInput').value = result.birthday;
+          }
+
+          const historyContainer = document.getElementById('historyList');
+          if (result.history && result.history.length > 0) {
+            let html = "";
+            result.history.forEach(item => {
+              const amountColor = item.amount > 0 ? "#06c755" : "#d9534f";
+              const amountText = item.amount > 0 ? `+${item.amount}` : item.amount;
+              html += `
+                <div class="history-item">
+                  <div>
+                    <div style="font-weight: bold; color: #333;">${item.remark}</div>
+                    <div class="history-info">${item.time} | 結餘: ${item.balance}元</div>
+                  </div>
+                  <div class="history-amount" style="color: ${amountColor};">${amountText}</div>
+                </div>
+              `;
+            });
+            historyContainer.innerHTML = html;
+          } else {
+            historyContainer.innerHTML = `<div style="color: #888; text-align: center; padding: 10px;">尚無交易紀錄</div>`;
+          }
+
         } else {
           alert("載入失敗：" + result.message);
         }
@@ -227,34 +274,25 @@
       }
     }
 
-    async function loadMemberHistory(uid) {
+    async function saveBirthday() {
+      const birthday = document.getElementById('birthdayInput').value;
+      if (!birthday) {
+        alert("請先選擇生日日期！");
+        return;
+      }
+
       try {
-        const response = await fetch(`${API_URL}?action=getHistory&uid=${uid}`);
+        const response = await fetch(`${API_URL}?action=updateBirthday&uid=${currentUid}&birthday=${encodeURIComponent(birthday)}`);
         const result = await response.json();
 
-        const historyContainer = document.getElementById('historyList');
-
-        if (result.success && result.history && result.history.length > 0) {
-          let html = "";
-          result.history.forEach(item => {
-            const amountColor = item.amount > 0 ? "#06c755" : "#d9534f";
-            const amountText = item.amount > 0 ? `+${item.amount}` : item.amount;
-            html += `
-              <div class="history-item">
-                <div>
-                  <div style="font-weight: bold; color: #333;">${item.remark}</div>
-                  <div class="history-info">${item.time} | 結餘: ${item.balance}元</div>
-                </div>
-                <div class="history-amount" style="color: ${amountColor};">${amountText}</div>
-              </div>
-            `;
-          });
-          historyContainer.innerHTML = html;
+        if (result.success) {
+          alert("🎂 生日儲存成功！");
+          loadMemberAllData(currentUid, ""); 
         } else {
-          historyContainer.innerHTML = `<div style="color: #888; text-align: center; padding: 10px;">尚無交易紀錄</div>`;
+          alert("儲存失敗：" + result.message);
         }
       } catch (error) {
-        document.getElementById('historyList').innerHTML = `<div style="color: #d9534f; text-align: center; padding: 10px;">無法載入紀錄: ${error.message}</div>`;
+        alert("發生錯誤：" + error.message);
       }
     }
   </script>
