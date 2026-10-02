@@ -51,38 +51,39 @@
       color: #222;
       font-size: 16px;
     }
-    .admin-panel {
-      margin-top: 20px;
-      padding-top: 15px;
-      border-top: 2px dashed #eee;
+    .history-section {
+      margin-top: 25px;
       text-align: left;
+      border-top: 1px solid #eee;
+      padding-top: 15px;
     }
-    .admin-title {
-      font-size: 13px;
-      color: #888;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-    button {
-      background-color: #06c755;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
+    .history-title {
       font-size: 14px;
-      cursor: pointer;
       font-weight: bold;
-      margin-right: 5px;
+      color: #444;
+      margin-bottom: 10px;
     }
-    button:active {
-      opacity: 0.8;
+    .history-list {
+      max-height: 180px;
+      overflow-y: auto;
+      font-size: 13px;
     }
-    input[type="number"] {
-      padding: 7px;
-      width: 80px;
-      border: 1px solid #ddd;
+    .history-item {
+      background: #fafafa;
+      padding: 8px 12px;
       border-radius: 6px;
-      margin-right: 5px;
+      margin-bottom: 8px;
+      border-left: 3px solid #06c755;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .history-info {
+      color: #666;
+      font-size: 12px;
+    }
+    .history-amount {
+      font-weight: bold;
     }
     #loading {
       padding: 40px 0;
@@ -119,14 +120,11 @@
         <span id="monthlyGiftClaimed" class="value">-</span>
       </div>
 
-      <!-- 店員專用快捷加值面板 -->
-      <div class="admin-panel">
-        <div class="admin-title">⚡ 櫃檯快速加值（店員操作）</div>
-        <div style="display: flex; align-items: center;">
-          <input type="number" id="addAmount" placeholder="金額" value="500">
-          <button onclick="addBalance(500)">+500</button>
-          <button onclick="addBalance(1000)">+1000</button>
-          <button onclick="customAdd()">自訂加值</button>
+      <!-- 儲值金使用紀錄區塊 -->
+      <div class="history-section">
+        <div class="history-title">📜 最近交易紀錄</div>
+        <div class="history-list" id="historyList">
+          <div style="color: #888; text-align: center; padding: 10px;">載入紀錄中...</div>
         </div>
       </div>
     </div>
@@ -135,8 +133,6 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbw3McIIaMCQl2RHeKTuV5zAMhzFk7LTM7oSSiM2S1jAYu4tFwsL28tWPLMu-iK7WHbo/exec"; 
     const MY_LIFF_ID = "2011836192-UdXeALfd"; 
-
-    let currentUid = ""; // 記錄當前會員的 UID
 
     window.onload = function() {
       initializeLiff();
@@ -149,20 +145,21 @@
             liff.login();
           } else {
             liff.getProfile().then(profile => {
-              currentUid = profile.userId;
               loadMemberData(profile.userId, profile.displayName);
+              loadMemberHistory(profile.userId);
             }).catch(err => {
               loadMemberData("U_test_error", "測試訪客");
+              loadMemberHistory("U_test_error");
             });
           }
         })
         .catch((err) => {
           loadMemberData("U_desktop_test", "The創老闆");
+          loadMemberHistory("U_desktop_test");
         });
     }
 
     async function loadMemberData(uid, name) {
-      currentUid = uid;
       try {
         const response = await fetch(`${API_URL}?action=getInfo&uid=${uid}&name=${encodeURIComponent(name)}`);
         const result = await response.json();
@@ -183,42 +180,34 @@
       }
     }
 
-    // 快速加值按鈕功能
-    async function addBalance(amount) {
-      if (!currentUid) {
-        alert("尚未取得會員 UID！");
-        return;
-      }
-
-      if (!confirm(`確定要幫此會員加值 ${amount} 元嗎？`)) {
-        return;
-      }
-
+    async function loadMemberHistory(uid) {
       try {
-        const url = `${API_URL}?action=updateBalance&uid=${currentUid}&amount=${amount}&remark=櫃檯快速加值`;
-        const response = await fetch(url);
+        const response = await fetch(`${API_URL}?action=getHistory&uid=${uid}`);
         const result = await response.json();
 
-        if (result.success) {
-          alert(`加值成功！目前餘額：${result.newBalance} 元`);
-          // 重新整理畫面的餘額顯示
-          document.getElementById('diyBalance').innerText = result.newBalance + " 元";
+        const historyContainer = document.getElementById('historyList');
+        if (result.success && result.history.length > 0) {
+          let html = "";
+          result.history.forEach(item => {
+            const amountColor = item.amount > 0 ? "#06c755" : "#d9534f";
+            const amountText = item.amount > 0 ? `+${item.amount}` : item.amount;
+            html += `
+              <div class="history-item">
+                <div>
+                  <div style="font-weight: bold; color: #333;">${item.remark}</div>
+                  <div class="history-info">${item.time} | 結餘: ${item.balance}元</div>
+                </div>
+                <div class="history-amount" style="color: ${amountColor};">${amountText}</div>
+              </div>
+            `;
+          });
+          historyContainer.innerHTML = html;
         } else {
-          alert("加值失敗：" + result.message);
+          historyContainer.innerHTML = `<div style="color: #888; text-align: center; padding: 10px;">尚無交易紀錄</div>`;
         }
       } catch (error) {
-        alert("發生錯誤：" + error.message);
+        document.getElementById('historyList').innerHTML = `<div style="color: #d9534f; text-align: center; padding: 10px;">無法載入紀錄</div>`;
       }
-    }
-
-    function customAdd() {
-      const val = document.getElementById('addAmount').value;
-      const num = parseInt(val);
-      if (isNaN(num) || num <= 0) {
-        alert("請輸入有效的金額！");
-        return;
-      }
-      addBalance(num);
     }
   </script>
 
