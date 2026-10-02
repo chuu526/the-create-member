@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The創 - 櫃檯管理後台</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      background: white;
+      width: 100%;
+      max-width: 500px;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    h2 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 20px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #555;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    button {
+      background-color: #06c755;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:active {
+      opacity: 0.8;
+    }
+    #resultBox {
+      margin-top: 20px;
+      padding: 12px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      display: none;
+      font-size: 14px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>🌿 The創 - 櫃檯加值管理</h2>
+    
+    <div class="form-group">
+      <label>請輸入或貼上客人的 LINE UID：</label>
+      <input type="text" id="uidInput" placeholder="例如：U123456789...">
+    </div>
+
+    <div class="form-group">
+      <label>操作類型：</label>
+      <select id="actionType">
+        <option value="500">加值 +500 元</option>
+        <option value="1000">加值 +1000 元</option>
+        <option value="2000">加值 +2000 元</option>
+        <option value="-1">【扣款】消費扣款（請自訂金額）</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>金額 (元)：</label>
+      <input type="number" id="amountInput" value="500">
+    </div>
+
+    <div class="form-group">
+      <label>備註說明：</label>
+      <input type="text" id="remarkInput" value="櫃檯現金儲值">
+    </div>
+
+    <button onclick="submitBalance()">確認送出加值/扣款</button>
+
+    <div id="resultBox"></div>
+  </div>
+
+  <script>
+    // 請確認這裡填入妳目前最新的 Apps Script 部署網址
+    const API_URL = "https://script.google.com/macros/s/AKfycbw3McIIaMCQl2RHeKTuV5zAMhzFk7LTM7oSSiM2S1jAYu4tFwsL28tWPLMu-iK7WHbo/exec";
+
+    // 當下拉選單改變時，自動帶入常用金額
+    document.getElementById('actionType').addEventListener('change', function() {
+      const val = this.value;
+      if (val !== "-1") {
+        document.getElementById('amountInput').value = val;
+        document.getElementById('remarkInput').value = "櫃檯現金儲值";
+      } else {
+        document.getElementById('amountInput').value = "";
+        document.getElementById('remarkInput').value = "DIY 消費扣款";
+      }
+    });
+
+    async function submitBalance() {
+      const uid = document.getElementById('uidInput').value.trim();
+      let amount = parseInt(document.getElementById('amountInput').value);
+      const remark = document.getElementById('remarkInput').value.trim();
+      const actionType = document.getElementById('actionType').value;
+
+      if (!uid) {
+        alert("請輸入客人的 LINE UID！");
+        return;
+      }
+      if (isNaN(amount) || amount <= 0) {
+        alert("請輸入有效的金額！");
+        return;
+      }
+
+      // 如果是扣款選項，金額轉為負數
+      if (actionType === "-1") {
+        amount = -Math.abs(amount);
+      }
+
+      if (!confirm(`確定要對此會員執行此筆金額變動嗎？`)) {
+        return;
+      }
+
+      const resultBox = document.getElementById('resultBox');
+      resultBox.style.display = 'block';
+      resultBox.innerHTML = "處理中...";
+
+      try {
+        const url = `${API_URL}?action=updateBalance&uid=${encodeURIComponent(uid)}&amount=${amount}&remark=${encodeURIComponent(remark)}`;
+        const response = await fetch(url);
+        const result = await response.json();
+
+        if (result.success) {
+          resultBox.innerHTML = `✅ <b>操作成功！</b><br>會員姓名：${result.name}<br>更新後餘額：<b>${result.newBalance} 元</b>`;
+          document.getElementById('uidInput').value = ""; // 清空輸入框
+        } else {
+          resultBox.innerHTML = `❌ 失敗：${result.message}`;
+        }
+      } catch (error) {
+        resultBox.innerHTML = `❌ 發生錯誤：${error.message}`;
+      }
+    }
+  </script>
+
+</body>
+</html>
