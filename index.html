@@ -3,340 +3,365 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The創 - 櫃檯管理後台</title>
-  <!-- 引入 QR Code 掃描套件 -->
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <title>The創 - 會員專區</title>
+  <script src="https://static.line-scdn.net/liff/2/sdk.js"></script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #fcfaf2; /* 溫暖柔和的米黃底色 */
+      background-color: #fcf9f5; /* 溫馨極淺米色背景 */
       margin: 0;
-      padding: 20px;
+      padding: 16px;
       display: flex;
       justify-content: center;
+      color: #3e2723;
     }
     .container {
-      background: #ffffff;
+      background: white;
       width: 100%;
-      max-width: 500px;
+      max-width: 480px;
       border-radius: 20px;
-      box-shadow: 0 6px 20px rgba(121, 85, 72, 0.1);
+      box-shadow: 0 6px 20px rgba(141, 110, 99, 0.1);
       padding: 24px;
       box-sizing: border-box;
-      border: 2px solid #f3e5ab; /* 暖黃邊框 */
+      border: 1px solid #efebe9;
     }
-    h2 {
-      color: #6d4c41; /* 濃咖啡色標題 */
+    .header {
       text-align: center;
       margin-bottom: 20px;
+    }
+    .header h2 {
+      color: #5d4037;
+      margin: 0 0 4px 0;
       font-size: 22px;
-      letter-spacing: 1px;
     }
-    .form-group {
-      margin-bottom: 16px;
-    }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      color: #795548;
-      font-size: 14px;
-      font-weight: bold;
-    }
-    input, select {
-      width: 100%;
-      padding: 11px 14px;
-      box-sizing: border-box;
-      border: 1.5px solid #d7ccc8;
-      border-radius: 10px;
-      font-size: 15px;
-      background-color: #fffdf9;
-      color: #4e342e;
-      transition: all 0.2s;
-    }
-    input:focus, select:focus {
-      outline: none;
-      border-color: #fbc02d; /* 聚焦時變成亮黃色 */
-      background-color: #fff;
-      box-shadow: 0 0 5px rgba(251, 192, 45, 0.3);
+    .header p {
+      color: #8d6e63;
+      margin: 0;
+      font-size: 13px;
     }
     
-    /* 掃描按鈕：淺咖啡色 */
-    .scan-btn {
+    /* 會員資訊卡片（淺黃/奶油色系） */
+    .card {
+      background: linear-gradient(135deg, #fffcf0 0% #fff8e1 100%);
+      border: 1px solid #ffe082;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.1);
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+    .info-row:last-child {
+      margin-bottom: 0;
+    }
+    .label {
+      color: #795548;
+      font-weight: bold;
+    }
+    .value {
+      color: #4e342e;
+      font-weight: 500;
+    }
+    .highlight-balance {
+      color: #d84315;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    /* 生日區塊 */
+    .birthday-section {
+      background: #faf8f6;
+      border: 1px solid #d7ccc8;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .birthday-section input {
+      padding: 8px 10px;
+      border: 1px solid #bcaaa4;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-right: 6px;
+      background: #fff;
+      color: #3e2723;
+    }
+
+    /* 按鈕樣式（淺咖啡色） */
+    .btn {
       background-color: #8d6e63;
       color: white;
       border: none;
-      width: 100%;
-      padding: 11px;
-      border-radius: 10px;
-      font-size: 15px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
       font-weight: bold;
       cursor: pointer;
-      margin-bottom: 10px;
       transition: background 0.2s;
-      box-shadow: 0 2px 6px rgba(141, 110, 99, 0.2);
     }
-    .scan-btn:hover {
+    .btn:hover {
       background-color: #6d4c41;
     }
-    #reader {
-      width: 100%;
-      display: none;
-      margin-bottom: 15px;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 2px solid #fbc02d;
+
+    /* QR Code 區塊 */
+    .qr-container {
+      background: #faf8f6;
+      border: 1px solid #d7ccc8;
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 16px;
     }
-    
-    /* 加值/扣款切換按鈕群組 */
-    .mode-switch {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 6px;
-    }
-    .mode-btn {
-      flex: 1;
-      padding: 11px;
-      border: 1.5px solid #d7ccc8;
-      border-radius: 10px;
-      background-color: #fffdf9;
-      color: #795548;
+    .qr-container h3 {
+      margin: 0 0 10px 0;
       font-size: 15px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    /* 加值選中：溫暖黃色風格 */
-    .mode-btn.active-topup {
-      background-color: #fbc02d;
-      color: #3e2723;
-      border-color: #f9a825;
-      box-shadow: 0 2px 6px rgba(251, 192, 45, 0.3);
-    }
-    /* 扣款選中：沈穩淺咖啡色風格 */
-    .mode-btn.active-deduct {
-      background-color: #a1887f;
-      color: white;
-      border-color: #8d6e63;
-      box-shadow: 0 2px 6px rgba(161, 136, 127, 0.3);
-    }
-
-    /* 快速金額按鈕：暖黃背景 */
-    .quick-amounts {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-      margin-bottom: 12px;
-    }
-    .quick-btn {
-      flex: 1;
-      padding: 7px;
-      background-color: #fff9c4; /* 奶油黃 */
-      border: 1px solid #fbc02d;
-      border-radius: 8px;
       color: #5d4037;
-      font-size: 13px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
     }
-    .quick-btn:hover {
-      background-color: #fff176;
+    #qrcode {
+      display: inline-block;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
 
-    /* 確認送出按鈕：主視覺黃色搭配咖啡字體，醒目又好看 */
-    button.submit-btn {
-      background-color: #fbc02d;
-      color: #3e2723;
-      border: none;
-      width: 100%;
-      padding: 13px;
-      border-radius: 10px;
+    /* 交易紀錄區塊 */
+    .history-section h3 {
       font-size: 16px;
+      color: #5d4037;
+      border-bottom: 2px solid #efebe9;
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+    }
+    .history-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .history-item {
+      background: #faf8f6;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .history-info .time {
+      color: #8d6e63;
+      font-size: 11px;
+    }
+    .history-info .remark {
+      color: #4e342e;
       font-weight: bold;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: all 0.2s;
-      box-shadow: 0 4px 10px rgba(251, 192, 45, 0.3);
+      margin-top: 2px;
     }
-    button.submit-btn:hover {
-      background-color: #f9a825;
+    .history-amount {
+      font-weight: bold;
+      font-size: 14px;
     }
-    button:active {
-      opacity: 0.85;
-      transform: scale(0.98);
+    .amount-plus {
+      color: #2e7d32;
+    }
+    .amount-minus {
+      color: #c62828;
     }
 
-    #resultBox {
-      margin-top: 20px;
-      padding: 14px;
-      background: #fffdef;
-      border: 1.5px solid #fbc02d;
-      border-radius: 10px;
-      display: none;
-      font-size: 14px;
-      color: #4e342e;
+    #loading {
+      text-align: center;
+      color: #8d6e63;
+      font-weight: bold;
+      padding: 20px;
     }
   </style>
+  <!-- 引入 qrious 套件用來產生 QR Code -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/min/qrious.min.js"></script>
 </head>
 <body>
 
   <div class="container">
-    <h2>☕ The創 - 櫃檯會員管理</h2>
-    
-    <div class="form-group">
-      <label>客人的 LINE UID：</label>
-      <button class="scan-btn" onclick="startScanner()">📷 掃描客人的 LINE QR Code</button>
-      <div id="reader"></div>
-      <input type="text" id="uidInput" placeholder="掃描後自動帶入，或手動貼上">
+    <div class="header">
+      <h2>🌿 The創 - 會員專區</h2>
+      <p>歡迎來到您的專屬會員中心</p>
     </div>
 
-    <div class="form-group">
-      <label>操作類型：</label>
-      <div class="mode-switch">
-        <button type="button" id="topupModeBtn" class="mode-btn active-topup" onclick="setMode('topup')">➕ 會員加值</button>
-        <button type="button" id="deductModeBtn" class="mode-btn" onclick="setMode('deduct')">➖ 消費扣款</button>
+    <div id="loading">載入會員資料中，請稍候...</div>
+
+    <div id="memberContent" style="display: none;">
+      <!-- 會員資訊卡片 -->
+      <div class="card">
+        <div class="info-row">
+          <span class="label">會員姓名：</span>
+          <span class="value" id="userName">-</span>
+        </div>
+        <div class="info-row">
+          <span class="label">會員等級：</span>
+          <span class="value" id="userLevel">-</span>
+        </div>
+        <div class="info-row">
+          <span class="label">儲值金餘額：</span>
+          <span class="value highlight-balance" id="userBalance">0 元</span>
+        </div>
       </div>
-      <!-- 快捷金額按鈕 -->
-      <div class="quick-amounts" id="quickAmountsContainer">
-        <button type="button" class="quick-btn" onclick="setAmount(500)">+500</button>
-        <button type="button" class="quick-btn" onclick="setAmount(1000)">+1000</button>
-        <button type="button" class="quick-btn" onclick="setAmount(2000)">+2000</button>
+
+      <!-- 生日設定區塊 -->
+      <div class="birthday-section" id="birthdayBox">
+        <div style="font-size: 14px; font-weight: bold; color: #5d4037; margin-bottom: 6px;">🎂 生日優惠設定</div>
+        <div id="birthdayDisplay" style="font-size: 13px; color: #6d4c41; margin-bottom: 8px;">-</div>
+        <div id="birthdayInputArea">
+          <input type="date" id="birthdayInput">
+          <button class="btn" onclick="saveBirthday()">儲存生日</button>
+        </div>
+      </div>
+
+      <!-- 會員 QR Code 區塊 -->
+      <div class="qr-container">
+        <h3>📱 結帳 / 櫃檯辨識專用 QR Code</h3>
+        <p style="font-size: 11px; color: #8d6e63; margin: 0 0 8px 0;">結帳或加值時出示此條碼給店員掃描</p>
+        <div>
+          <canvas id="qrcode"></canvas>
+        </div>
+      </div>
+
+      <!-- 消費與儲值紀錄 -->
+      <div class="history-section">
+        <h3>📜 近期交易紀錄</h3>
+        <div class="history-list" id="historyList">
+          <!-- 動態插入紀錄 -->
+        </div>
       </div>
     </div>
-
-    <div class="form-group">
-      <label id="amountLabel">加值金額 (元)：</label>
-      <input type="number" id="amountInput" value="500">
-    </div>
-
-    <div class="form-group">
-      <label>備註說明：</label>
-      <input type="text" id="remarkInput" value="櫃檯現金儲值">
-    </div>
-
-    <button class="submit-btn" id="submitBtn" onclick="submitBalance()">確認送出加值</button>
-
-    <div id="resultBox"></div>
   </div>
 
   <script>
     // 請確認這裡填入妳目前最新的 Apps Script 部署網址
     const API_URL = "https://script.google.com/macros/s/AKfycbw34bhpUh__cAb2liixfNKW15-mBUM45M74WxvzYMWesFZHEYtn__Rh1ux3q3JBbKUv/exec";
+    
+    // 填入妳的 LIFF ID (如果有的話，若無則會自動用模擬測試或直接從網址列抓 UID)
+    const LIFF_ID = "YOUR_LIFF_ID"; 
 
-    let html5QrCode;
-    let currentMode = 'topup'; // 'topup' 或 'deduct'
+    let currentUid = "";
 
-    // 切換加值或扣款模式
-    function setMode(mode) {
-      currentMode = mode;
-      const topupBtn = document.getElementById('topupModeBtn');
-      const deductBtn = document.getElementById('deductModeBtn');
-      const amountLabel = document.getElementById('amountLabel');
-      const remarkInput = document.getElementById('remarkInput');
-      const submitBtn = document.getElementById('submitBtn');
-      const quickContainer = document.getElementById('quickAmountsContainer');
-
-      if (mode === 'topup') {
-        topupBtn.className = "mode-btn active-topup";
-        deductBtn.className = "mode-btn";
-        amountLabel.innerText = "加值金額 (元)：";
-        remarkInput.value = "櫃檯現金儲值";
-        submitBtn.innerText = "確認送出加值";
-        submitBtn.style.backgroundColor = "#fbc02d";
-        submitBtn.style.color = "#3e2723";
-        quickContainer.style.display = "flex";
-        document.getElementById('amountInput').value = "500";
-      } else {
-        topupBtn.className = "mode-btn";
-        deductBtn.className = "mode-btn active-deduct";
-        amountLabel.innerText = "扣款金額 (元)：";
-        remarkInput.value = "DIY 消費扣款";
-        submitBtn.innerText = "確認送出扣款";
-        submitBtn.style.backgroundColor = "#8d6e63";
-        submitBtn.style.color = "white";
-        quickContainer.style.display = "none";
-        document.getElementById('amountInput').value = "";
-      }
-    }
-
-    function setAmount(val) {
-      document.getElementById('amountInput').value = val;
-    }
-
-    // 啟動相機掃描
-    function startScanner() {
-      const readerDiv = document.getElementById('reader');
-      readerDiv.style.display = 'block';
-
-      if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("reader");
-      }
-
-      html5QrCode.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 }
-        },
-        (decodedText, decodedResult) => {
-          handleScannedData(decodedText);
-          html5QrCode.stop().then(() => {
-            readerDiv.style.display = 'none';
-          }).catch(err => console.error(err));
-        },
-        (errorMessage) => {}
-      ).catch(err => {
-        alert("無法開啟相機，請檢查相機權限是否允許！");
-        readerDiv.style.display = 'none';
-      });
-    }
-
-    function handleScannedData(text) {
-      document.getElementById('uidInput').value = text;
-      alert("成功讀取 QR Code！");
-    }
-
-    async function submitBalance() {
-      const uid = document.getElementById('uidInput').value.trim();
-      let amount = parseInt(document.getElementById('amountInput').value);
-      const remark = document.getElementById('remarkInput').value.trim();
-
-      if (!uid) {
-        alert("請先掃描客人的 QR Code 或輸入 UID！");
-        return;
-      }
-      if (isNaN(amount) || amount <= 0) {
-        alert("請輸入有效的金額！");
-        return;
-      }
-
-      // 如果是扣款模式，將金額轉為負數傳給後端
-      if (currentMode === 'deduct') {
-        amount = -Math.abs(amount);
-      }
-
-      const actionText = currentMode === 'topup' ? '加值' : '扣款';
-      if (!confirm(`確定要對此會員執行 ${Math.abs(amount)} 元的${actionText}嗎？`)) {
-        return;
-      }
-
-      const resultBox = document.getElementById('resultBox');
-      resultBox.style.display = 'block';
-      resultBox.innerHTML = "處理中...";
-
+    window.onload = async function() {
       try {
-        const url = `${API_URL}?action=updateBalance&uid=${encodeURIComponent(uid)}&amount=${amount}&remark=${encodeURIComponent(remark)}`;
-        const response = await fetch(url);
-        const result = await response.json();
-
-        if (result.success) {
-          resultBox.innerHTML = `✅ <b>${actionText}成功！</b><br>會員姓名：${result.name}<br>更新後餘額：<b>${result.newBalance} 元</b>`;
-          document.getElementById('uidInput').value = "";
+        // 初始化 LIFF 取得使用者 UID
+        if (typeof liff !== 'undefined' && LIFF_ID !== "YOUR_LIFF_ID") {
+          await liff.init({ liffId: LIFF_ID });
+          if (!liff.isLoggedIn()) {
+            liff.login();
+            return;
+          }
+          const profile = await liff.getProfile();
+          currentUid = profile.userId;
+          fetchMemberData(currentUid, profile.displayName);
         } else {
-          resultBox.innerHTML = `❌ 失敗：${result.message}`;
+          // 開發測試用：如果沒有開 LIFF，可以從網址列 ?uid=xxx 測試，或是給預設測試 UID
+          const urlParams = new URLSearchParams(window.location.search);
+          currentUid = urlParams.get('uid') || "TEST_UID_001";
+          const testName = urlParams.get('name') || "測試會員";
+          fetchMemberData(currentUid, testName);
         }
       } catch (error) {
-        resultBox.innerHTML = `❌ 發生錯誤：${error.message}`;
+        document.getElementById('loading').innerHTML = "載入失敗：" + error.message;
+      }
+    };
+
+    async function fetchMemberData(uid, name) {
+      try {
+        const url = `${API_URL}?action=getMemberAll&uid=${encodeURIComponent(uid)}&name=${encodeURIComponent(name)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.success) {
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('memberContent').style.display = 'block';
+
+          document.getElementById('userName').innerText = data.name;
+          document.getElementById('userLevel').innerText = data.level;
+          document.getElementById('userBalance').innerText = data.diyBalance.toLocaleString() + " 元";
+
+          // 處理生日顯示
+          const birthdayBox = document.getElementById('birthdayDisplay');
+          const inputArea = document.getElementById('birthdayInputArea');
+          if (data.birthday) {
+            birthdayBox.innerHTML = `🎁 您的生日：<b>${data.birthday}</b> (${data.birthdayBenefit})`;
+            inputArea.style.display = 'none'; // 設定過就隱藏輸入框
+          } else {
+            birthdayBox.innerHTML = `🎁 尚未設定生日（設定後當月壽星享專屬優惠！）`;
+            inputArea.style.display = 'block';
+          }
+
+          // 產生 QR Code (將 UID 轉換為 QR Code 讓櫃檯掃描)
+          new QRious({
+            element: document.getElementById('qrcode'),
+            value: uid,
+            size: 160,
+            level: 'H',
+            background: '#ffffff',
+            foreground: '#4e342e'
+          });
+
+          // 渲染歷史紀錄
+          const historyList = document.getElementById('historyList');
+          historyList.innerHTML = "";
+          if (data.history && data.history.length > 0) {
+            data.history.forEach(item => {
+              const isPlus = item.amount >= 0;
+              const amountStr = (isPlus ? "+" : "") + item.amount.toLocaleString();
+              const amountClass = isPlus ? "amount-plus" : "amount-minus";
+
+              const div = document.createElement('div');
+              div.className = "history-item";
+              div.innerHTML = `
+                <div class="history-info">
+                  <div class="time">${item.time}</div>
+                  <div class="remark">${item.remark}</div>
+                </div>
+                <div class="history-amount ${amountClass}">${amountStr} 元</div>
+              `;
+              historyList.appendChild(div);
+            });
+          } else {
+            historyList.innerHTML = `<div style="text-align: center; color: #8d6e63; font-size: 13px; padding: 10px;">目前尚無交易紀錄</div>`;
+          }
+
+        } else {
+          document.getElementById('loading').innerHTML = "無法取得會員資料：" + data.message;
+        }
+      } catch (err) {
+        document.getElementById('loading').innerHTML = "連線發生錯誤：" + err.message;
+      }
+    }
+
+    async function saveBirthday() {
+      const birthday = document.getElementById('birthdayInput').value;
+      if (!birthday) {
+        alert("請選擇您的生日日期！");
+        return;
+      }
+
+      if (!confirm(`確定生日為 ${birthday} 嗎？設定後將無法自行修改喔！`)) {
+        return;
+      }
+
+      try {
+        const url = `${API_URL}?action=updateBirthday&uid=${encodeURIComponent(currentUid)}&birthday=${encodeURIComponent(birthday)}`;
+        const res = await fetch(url);
+        const result = await res.json();
+
+        if (result.success) {
+          alert("生日設定成功！");
+          location.reload(); // 重新整理頁面更新狀態
+        } else {
+          alert("設定失敗：" + result.message);
+        }
+      } catch (e) {
+        alert("發生錯誤：" + e.message);
       }
     }
   </script>
