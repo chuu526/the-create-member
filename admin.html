@@ -236,11 +236,11 @@
         topupBtn.className = "mode-btn";
         deductBtn.className = "mode-btn active-deduct";
         amountLabel.innerText = "扣款金額 (元)：";
-        remarkInput.value = "DIY 消費扣款";
+        remarkInput.value = "生日禮兌換";
         submitBtn.innerText = "確認送出扣款";
         submitBtn.style.backgroundColor = "#8d6e63";
         quickContainer.style.display = "none";
-        document.getElementById('amountInput').value = "";
+        document.getElementById('amountInput').value = "0";
       }
     }
 
@@ -290,12 +290,14 @@
         alert("請先掃描客人的 QR Code 或輸入 UID！");
         return;
       }
-      if (isNaN(amount) || amount <= 0) {
+      
+      // 修改這裡：改為允許 0 元（大於或等於 0 即可）
+      if (isNaN(amount) || amount < 0) {
         alert("請輸入有效的金額！");
         return;
       }
 
-      // 如果是扣款模式，將金額轉為負數傳給後端
+      // 如果是扣款模式，將金額轉為負數傳給後端（如果是 0 則保持 0）
       if (currentMode === 'deduct') {
         amount = -Math.abs(amount);
       }
