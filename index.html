@@ -228,16 +228,17 @@
     }
 
     async function loadMemberHistory(uid) {
-      // 彈跳視窗讓妳看目前傳進來的 UID 是什麼
-      alert("目前抓到的 UID 檢查: " + uid);
-
       try {
         const response = await fetch(`${API_URL}?action=getHistory&uid=${uid}`);
         const result = await response.json();
 
         const historyContainer = document.getElementById('historyList');
-        if (result.success && result.history.length > 0) {
-          let html = "";
+        
+        // 🛑 顯示後端回傳的原始 JSON 資料供檢查
+        let debugHtml = `<div style="font-size: 11px; color: blue; padding: 4px; word-break: break-all; background: #eef; margin-bottom: 5px;">後端回傳：${JSON.stringify(result)}</div>`;
+
+        if (result.success && result.history && result.history.length > 0) {
+          let html = debugHtml;
           result.history.forEach(item => {
             const amountColor = item.amount > 0 ? "#06c755" : "#d9534f";
             const amountText = item.amount > 0 ? `+${item.amount}` : item.amount;
@@ -253,10 +254,10 @@
           });
           historyContainer.innerHTML = html;
         } else {
-          historyContainer.innerHTML = `<div style="color: #888; text-align: center; padding: 10px;">尚無交易紀錄 (UID: ${uid})</div>`;
+          historyContainer.innerHTML = debugHtml + `<div style="color: #888; text-align: center; padding: 10px;">尚無交易紀錄 (UID: ${uid})</div>`;
         }
       } catch (error) {
-        document.getElementById('historyList').innerHTML = `<div style="color: #d9534f; text-align: center; padding: 10px;">無法載入紀錄</div>`;
+        document.getElementById('historyList').innerHTML = `<div style="color: #d9534f; text-align: center; padding: 10px;">無法載入紀錄: ${error.message}</div>`;
       }
     }
   </script>
