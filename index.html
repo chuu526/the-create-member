@@ -3,365 +3,308 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The創 - 會員專區</title>
-  <script src="https://static.line-scdn.net/liff/2/sdk.js"></script>
+  <title>The創會員中心</title>
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #fcf9f5; /* 溫馨極淺米色背景 */
+      background-color: #f7f9fa;
       margin: 0;
-      padding: 16px;
+      padding: 20px;
       display: flex;
       justify-content: center;
-      color: #3e2723;
+      align-items: center;
+      min-height: 100vh;
     }
-    .container {
+    .card {
       background: white;
       width: 100%;
-      max-width: 480px;
-      border-radius: 20px;
-      box-shadow: 0 6px 20px rgba(141, 110, 99, 0.1);
+      max-width: 400px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       padding: 24px;
       box-sizing: border-box;
-      border: 1px solid #efebe9;
-    }
-    .header {
       text-align: center;
+    }
+    .logo {
+      font-weight: bold;
+      color: #333;
       margin-bottom: 20px;
-    }
-    .header h2 {
-      color: #5d4037;
-      margin: 0 0 4px 0;
-      font-size: 22px;
-    }
-    .header p {
-      color: #8d6e63;
-      margin: 0;
-      font-size: 13px;
-    }
-    
-    /* 會員資訊卡片（淺黃/奶油色系） */
-    .card {
-      background: linear-gradient(135deg, #fffcf0 0% #fff8e1 100%);
-      border: 1px solid #ffe082;
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.1);
-    }
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      font-size: 15px;
-    }
-    .info-row:last-child {
-      margin-bottom: 0;
-    }
-    .label {
-      color: #795548;
-      font-weight: bold;
-    }
-    .value {
-      color: #4e342e;
-      font-weight: 500;
-    }
-    .highlight-balance {
-      color: #d84315;
-      font-weight: bold;
       font-size: 18px;
     }
-
-    /* 生日區塊 */
-    .birthday-section {
-      background: #faf8f6;
-      border: 1px solid #d7ccc8;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-    .birthday-section input {
-      padding: 8px 10px;
-      border: 1px solid #bcaaa4;
+    .info-group {
+      margin: 15px 0;
+      text-align: left;
+      background: #f9f9f9;
+      padding: 12px 16px;
       border-radius: 8px;
-      font-size: 14px;
-      margin-right: 6px;
-      background: #fff;
-      color: #3e2723;
-    }
-
-    /* 按鈕樣式（淺咖啡色） */
-    .btn {
-      background-color: #8d6e63;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn:hover {
-      background-color: #6d4c41;
-    }
-
-    /* QR Code 區塊 */
-    .qr-container {
-      background: #faf8f6;
-      border: 1px solid #d7ccc8;
-      border-radius: 14px;
-      padding: 16px;
-      text-align: center;
-      margin-bottom: 16px;
-    }
-    .qr-container h3 {
-      margin: 0 0 10px 0;
-      font-size: 15px;
-      color: #5d4037;
-    }
-    #qrcode {
-      display: inline-block;
-      padding: 10px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-
-    /* 交易紀錄區塊 */
-    .history-section h3 {
-      font-size: 16px;
-      color: #5d4037;
-      border-bottom: 2px solid #efebe9;
-      padding-bottom: 6px;
-      margin-bottom: 10px;
-    }
-    .history-list {
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    .history-item {
-      background: #faf8f6;
-      border: 1px solid #eee;
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 8px;
-      font-size: 13px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .history-info .time {
-      color: #8d6e63;
-      font-size: 11px;
+    .label {
+      color: #666;
+      font-size: 14px;
     }
-    .history-info .remark {
-      color: #4e342e;
+    .value {
       font-weight: bold;
-      margin-top: 2px;
+      color: #222;
+      font-size: 16px;
+    }
+    .qrcode-section {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .qrcode-title {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    #qrcode {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .history-section {
+      margin-top: 20px;
+      text-align: left;
+      border-top: 1px solid #eee;
+      padding-top: 15px;
+    }
+    .history-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 10px;
+    }
+    .history-list {
+      max-height: 140px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+    .history-item {
+      background: #fafafa;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      border-left: 3px solid #06c755;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .history-info {
+      color: #666;
+      font-size: 11px;
     }
     .history-amount {
       font-weight: bold;
-      font-size: 14px;
     }
-    .amount-plus {
-      color: #2e7d32;
-    }
-    .amount-minus {
-      color: #c62828;
-    }
-
-    #loading {
-      text-align: center;
-      color: #8d6e63;
+    .btn-save {
+      background-color: #06c755;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
       font-weight: bold;
-      padding: 20px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn-save:active {
+      opacity: 0.8;
+    }
+    #loading {
+      padding: 40px 0;
+      color: #666;
+      font-size: 15px;
+    }
+    #content {
+      display: none;
     }
   </style>
-  <!-- 引入 qrious 套件用來產生 QR Code -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/min/qrious.min.js"></script>
 </head>
 <body>
 
-  <div class="container">
-    <div class="header">
-      <h2>🌿 The創 - 會員專區</h2>
-      <p>歡迎來到您的專屬會員中心</p>
-    </div>
+  <div class="card">
+    <div class="logo">🌿 The創會員中心</div>
+    
+    <div id="loading">載入會員資料中...</div>
 
-    <div id="loading">載入會員資料中，請稍候...</div>
-
-    <div id="memberContent" style="display: none;">
-      <!-- 會員資訊卡片 -->
-      <div class="card">
-        <div class="info-row">
-          <span class="label">會員姓名：</span>
-          <span class="value" id="userName">-</span>
+    <div id="content">
+      <div class="info-group">
+        <span class="label">會員姓名</span>
+        <span id="name" class="value">-</span>
+      </div>
+      <div class="info-group">
+        <span class="label">會員等級</span>
+        <span id="level" class="value">-</span>
+      </div>
+      <div class="info-group">
+        <span class="label">DIY 儲值金餘額</span>
+        <span id="diyBalance" class="value" style="color: #d9534f;">-</span>
+      </div>
+      
+      <!-- 生日設定/顯示區塊 -->
+      <div class="info-group" style="flex-direction: column; align-items: stretch; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="label">壽星專屬福利</span>
+          <span id="birthdayBenefit" style="font-size: 12px; color: #e67e22; font-weight: bold;">-</span>
         </div>
-        <div class="info-row">
-          <span class="label">會員等級：</span>
-          <span class="value" id="userLevel">-</span>
+        <!-- 未設定時顯示輸入框與按鈕 -->
+        <div id="birthdaySetArea" style="display: flex; gap: 8px; align-items: center;">
+          <input type="date" id="birthdayInput" style="flex: 1; padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;">
+          <button class="btn-save" onclick="saveBirthday()">儲存生日</button>
         </div>
-        <div class="info-row">
-          <span class="label">儲值金餘額：</span>
-          <span class="value highlight-balance" id="userBalance">0 元</span>
+        <!-- 已設定時顯示鎖定文字 -->
+        <div id="birthdayDisplayArea" style="display: none; font-size: 14px; color: #333; font-weight: bold; text-align: center; padding: 4px 0;">
+          🎂 生日已設定：<span id="birthdayText"></span>
         </div>
       </div>
 
-      <!-- 生日設定區塊 -->
-      <div class="birthday-section" id="birthdayBox">
-        <div style="font-size: 14px; font-weight: bold; color: #5d4037; margin-bottom: 6px;">🎂 生日優惠設定</div>
-        <div id="birthdayDisplay" style="font-size: 13px; color: #6d4c41; margin-bottom: 8px;">-</div>
-        <div id="birthdayInputArea">
-          <input type="date" id="birthdayInput">
-          <button class="btn" onclick="saveBirthday()">儲存生日</button>
-        </div>
+      <!-- 客人專屬會員條碼 -->
+      <div class="qrcode-section">
+        <div class="qrcode-title">🪪 我的會員條碼（結帳/儲值請出示）</div>
+        <div id="qrcode"></div>
       </div>
 
-      <!-- 會員 QR Code 區塊 -->
-      <div class="qr-container">
-        <h3>📱 結帳 / 櫃檯辨識專用 QR Code</h3>
-        <p style="font-size: 11px; color: #8d6e63; margin: 0 0 8px 0;">結帳或加值時出示此條碼給店員掃描</p>
-        <div>
-          <canvas id="qrcode"></canvas>
-        </div>
-      </div>
-
-      <!-- 消費與儲值紀錄 -->
+      <!-- 交易紀錄 -->
       <div class="history-section">
-        <h3>📜 近期交易紀錄</h3>
+        <div class="history-title">📜 最近交易紀錄</div>
         <div class="history-list" id="historyList">
-          <!-- 動態插入紀錄 -->
+          <div style="color: #888; text-align: center; padding: 10px;">載入紀錄中...</div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // 請確認這裡填入妳目前最新的 Apps Script 部署網址
-    const API_URL = "https://script.google.com/macros/s/AKfycbw34bhpUh__cAb2liixfNKW15-mBUM45M74WxvzYMWesFZHEYtn__Rh1ux3q3JBbKUv/exec";
-    
-    // 填入妳的 LIFF ID (如果有的話，若無則會自動用模擬測試或直接從網址列抓 UID)
-    const LIFF_ID = "YOUR_LIFF_ID"; 
-
+    const API_URL = "https://script.google.com/macros/s/AKfycbw34bhpUh__cAb2liixfNKW15-mBUM45M74WxvzYMWesFZHEYtn__Rh1ux3q3JBbKUv/exec"; 
+    const MY_LIFF_ID = "2011836192-UdXeALfd"; 
     let currentUid = "";
 
-    window.onload = async function() {
-      try {
-        // 初始化 LIFF 取得使用者 UID
-        if (typeof liff !== 'undefined' && LIFF_ID !== "YOUR_LIFF_ID") {
-          await liff.init({ liffId: LIFF_ID });
-          if (!liff.isLoggedIn()) {
-            liff.login();
-            return;
-          }
-          const profile = await liff.getProfile();
-          currentUid = profile.userId;
-          fetchMemberData(currentUid, profile.displayName);
-        } else {
-          // 開發測試用：如果沒有開 LIFF，可以從網址列 ?uid=xxx 測試，或是給預設測試 UID
-          const urlParams = new URLSearchParams(window.location.search);
-          currentUid = urlParams.get('uid') || "TEST_UID_001";
-          const testName = urlParams.get('name') || "測試會員";
-          fetchMemberData(currentUid, testName);
-        }
-      } catch (error) {
-        document.getElementById('loading').innerHTML = "載入失敗：" + error.message;
+    window.onload = function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const testUid = urlParams.get('uid');
+
+      if (testUid) {
+        currentUid = testUid;
+        loadMemberAllData(testUid, "測試會員");
+        generateQRCode(testUid);
+      } else {
+        initializeLiff();
       }
     };
 
-    async function fetchMemberData(uid, name) {
-      try {
-        const url = `${API_URL}?action=getMemberAll&uid=${encodeURIComponent(uid)}&name=${encodeURIComponent(name)}`;
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (data.success) {
-          document.getElementById('loading').style.display = 'none';
-          document.getElementById('memberContent').style.display = 'block';
-
-          document.getElementById('userName').innerText = data.name;
-          document.getElementById('userLevel').innerText = data.level;
-          document.getElementById('userBalance').innerText = data.diyBalance.toLocaleString() + " 元";
-
-          // 處理生日顯示
-          const birthdayBox = document.getElementById('birthdayDisplay');
-          const inputArea = document.getElementById('birthdayInputArea');
-          if (data.birthday) {
-            birthdayBox.innerHTML = `🎁 您的生日：<b>${data.birthday}</b> (${data.birthdayBenefit})`;
-            inputArea.style.display = 'none'; // 設定過就隱藏輸入框
+    function initializeLiff() {
+      liff.init({ liffId: MY_LIFF_ID })
+        .then(() => {
+          if (!liff.isLoggedIn()) {
+            liff.login();
           } else {
-            birthdayBox.innerHTML = `🎁 尚未設定生日（設定後當月壽星享專屬優惠！）`;
-            inputArea.style.display = 'block';
+            liff.getProfile().then(profile => {
+              currentUid = profile.userId;
+              loadMemberAllData(profile.userId, profile.displayName);
+              generateQRCode(profile.userId);
+            }).catch(err => {
+              currentUid = "U_test_error";
+              loadMemberAllData(currentUid, "測試訪客");
+              generateQRCode(currentUid);
+            });
+          }
+        })
+        .catch((err) => {
+          currentUid = "U_desktop_test";
+          loadMemberAllData(currentUid, "The創老闆");
+          generateQRCode(currentUid);
+        });
+    }
+
+    function generateQRCode(uid) {
+      document.getElementById("qrcode").innerHTML = "";
+      new QRCode(document.getElementById("qrcode"), {
+        text: uid,
+        width: 140,
+        height: 140
+      });
+    }
+
+    async function loadMemberAllData(uid, name) {
+      try {
+        const response = await fetch(`${API_URL}?action=getMemberAll&uid=${uid}&name=${encodeURIComponent(name)}`);
+        const result = await response.json();
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+
+        if (result.success) {
+          document.getElementById('name').innerText = result.name;
+          document.getElementById('level').innerText = result.level;
+          document.getElementById('diyBalance').innerText = result.diyBalance + " 元";
+          document.getElementById('birthdayBenefit').innerText = result.birthdayBenefit;
+
+          // 判斷是否已經填過生日
+          if (result.birthday) {
+            document.getElementById('birthdaySetArea').style.display = 'none'; // 隱藏輸入框跟按鈕
+            document.getElementById('birthdayDisplayArea').style.display = 'block'; // 顯示已設定文字
+            document.getElementById('birthdayText').innerText = result.birthday;
+          } else {
+            document.getElementById('birthdaySetArea').style.display = 'flex'; // 顯示輸入框
+            document.getElementById('birthdayDisplayArea').style.display = 'none'; // 隱藏已設定文字
           }
 
-          // 產生 QR Code (將 UID 轉換為 QR Code 讓櫃檯掃描)
-          new QRious({
-            element: document.getElementById('qrcode'),
-            value: uid,
-            size: 160,
-            level: 'H',
-            background: '#ffffff',
-            foreground: '#4e342e'
-          });
-
-          // 渲染歷史紀錄
-          const historyList = document.getElementById('historyList');
-          historyList.innerHTML = "";
-          if (data.history && data.history.length > 0) {
-            data.history.forEach(item => {
-              const isPlus = item.amount >= 0;
-              const amountStr = (isPlus ? "+" : "") + item.amount.toLocaleString();
-              const amountClass = isPlus ? "amount-plus" : "amount-minus";
-
-              const div = document.createElement('div');
-              div.className = "history-item";
-              div.innerHTML = `
-                <div class="history-info">
-                  <div class="time">${item.time}</div>
-                  <div class="remark">${item.remark}</div>
+          const historyContainer = document.getElementById('historyList');
+          if (result.history && result.history.length > 0) {
+            let html = "";
+            result.history.forEach(item => {
+              const amountColor = item.amount > 0 ? "#06c755" : "#d9534f";
+              const amountText = item.amount > 0 ? `+${item.amount}` : item.amount;
+              html += `
+                <div class="history-item">
+                  <div>
+                    <div style="font-weight: bold; color: #333;">${item.remark}</div>
+                    <div class="history-info">${item.time} | 結餘: ${item.balance}元</div>
+                  </div>
+                  <div class="history-amount" style="color: ${amountColor};">${amountText}</div>
                 </div>
-                <div class="history-amount ${amountClass}">${amountStr} 元</div>
               `;
-              historyList.appendChild(div);
             });
+            historyContainer.innerHTML = html;
           } else {
-            historyList.innerHTML = `<div style="text-align: center; color: #8d6e63; font-size: 13px; padding: 10px;">目前尚無交易紀錄</div>`;
+            historyContainer.innerHTML = `<div style="color: #888; text-align: center; padding: 10px;">尚無交易紀錄</div>`;
           }
 
         } else {
-          document.getElementById('loading').innerHTML = "無法取得會員資料：" + data.message;
+          alert("載入失敗：" + result.message);
         }
-      } catch (err) {
-        document.getElementById('loading').innerHTML = "連線發生錯誤：" + err.message;
+      } catch (error) {
+        document.getElementById('loading').innerText = "發生錯誤：" + error.message;
       }
     }
 
     async function saveBirthday() {
       const birthday = document.getElementById('birthdayInput').value;
       if (!birthday) {
-        alert("請選擇您的生日日期！");
-        return;
-      }
-
-      if (!confirm(`確定生日為 ${birthday} 嗎？設定後將無法自行修改喔！`)) {
+        alert("請先選擇生日日期！");
         return;
       }
 
       try {
-        const url = `${API_URL}?action=updateBirthday&uid=${encodeURIComponent(currentUid)}&birthday=${encodeURIComponent(birthday)}`;
-        const res = await fetch(url);
-        const result = await res.json();
+        const response = await fetch(`${API_URL}?action=updateBirthday&uid=${currentUid}&birthday=${encodeURIComponent(birthday)}`);
+        const result = await response.json();
 
         if (result.success) {
-          alert("生日設定成功！");
-          location.reload(); // 重新整理頁面更新狀態
+          alert("🎂 生日儲存成功！");
+          loadMemberAllData(currentUid, ""); 
         } else {
-          alert("設定失敗：" + result.message);
+          alert("儲存失敗：" + result.message);
         }
-      } catch (e) {
-        alert("發生錯誤：" + e.message);
+      } catch (error) {
+        alert("發生錯誤：" + error.message);
       }
     }
   </script>
