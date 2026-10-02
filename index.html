@@ -161,17 +161,14 @@
     const MY_LIFF_ID = "2011836192-UdXeALfd"; 
 
     window.onload = function() {
-      // 檢查網址列有沒有帶 ?uid=xxx 參數（方便電腦直接測試）
       const urlParams = new URLSearchParams(window.location.search);
       const testUid = urlParams.get('uid');
 
       if (testUid) {
-        // 如果有帶，就直接用這個 UID 撈資料，不用走 LIFF
         loadMemberData(testUid, "測試會員");
         loadMemberHistory(testUid);
         generateQRCode(testUid);
       } else {
-        // 正常手機 LIFF 流程
         initializeLiff();
       }
     };
@@ -231,6 +228,9 @@
     }
 
     async function loadMemberHistory(uid) {
+      // 彈跳視窗讓妳看目前傳進來的 UID 是什麼
+      alert("目前抓到的 UID 檢查: " + uid);
+
       try {
         const response = await fetch(`${API_URL}?action=getHistory&uid=${uid}`);
         const result = await response.json();
@@ -253,7 +253,7 @@
           });
           historyContainer.innerHTML = html;
         } else {
-          historyContainer.innerHTML = `<div style="color: #888; text-align: center; padding: 10px;">尚無交易紀錄</div>`;
+          historyContainer.innerHTML = `<div style="color: #888; text-align: center; padding: 10px;">尚無交易紀錄 (UID: ${uid})</div>`;
         }
       } catch (error) {
         document.getElementById('historyList').innerHTML = `<div style="color: #d9534f; text-align: center; padding: 10px;">無法載入紀錄</div>`;
